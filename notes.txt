@@ -1,0 +1,140 @@
+## Primer proyecto webpack
+Se crea el archivo de configuracion de webpack => webpack.config.js
+
+const path = require('path'); // Se require path, que es un elemento que esta diponible en node.js de forma nativa
+
+// se crea un modulo con un objeto que contiene la configuracion 
+module.exports = {
+    entry: './src/index.js', // Punto de entrada, el archivo que va a leer webpack para empaquetar
+    output: { // Punto de salida
+        path: path.resolve(__dirname, 'dist'), // Ubicacion y nombre del directorio donde se genera el archivo bundle (generalmente se nombra el directorio como dist)
+        filename: 'main.js' // Nombre del archivo bundle, generalmente se nombra mani.js o bundle.js
+    },
+    resolve: {
+        extensions: ['.js'] // Array de extensiones que va a resolver webpack, .js, .css, .scss, etc.
+    }
+}
+
+-- Si se quiere añadir el autocompletado en el archivo de configuracion de webpack, debemos añadir la siguiente linea => @type {import('webpack').Configuration} 
+-- Se agrega antes del module.exports
+
+-- Para ejecutar webpack utilizando la configuracion creada se utiliza el comando:
+-- npx webpack --mode production --config webpack.config.js 
+
+##INFORMACION SOBRE LOADERS Y PLUGINS 
+
+Webpack solamente entiende JavaScript y JSON. Los loaders nos permite procesar archivos de otros tipos para convertirnos en módulos válidos que serán consumidos por nuestras aplicaciones y agregadas como dependencias.
+
+En alto nivel, los loaders poseen 2 configuraciones principales:
+
+test - propiedad que identifica cuáles archivos deberán ser transformados
+use - propiedad que identifica el loader que será usado para transformar a dichos archivos
+Plugins
+Mientras los loaders transforman ciertos tipos de módulos, los plugins _son utilizados para extender tareas específicas, como la optimización de paquetes, la gestión de activos y la inyección de variables de entorno.
+
+Una vez importado el plugin, podemos desear el personalizarlos a través de opciones.
+
+## BABEL
+
+** Una practica muy recomendable es utilizar Babel para el codigo js
+-- Babel se encarga de optimizar el codigo js para que pueda ser ejecutado en cualquier version y tipo de navegador
+-- Para instalar Babel como dependencia de nuestro proyecto, ejecutamos el siguiente comando:
+
+--> npm install -D babel-loader @babel/core @babel/preset-env @babel/plugin-transform-runtime
+-- babel-loader nos permite usar babel con webpack
+-- @babel/core es babel en general
+-- @babel/preset-env trae y te permite usar las ultimas características de JavaScript
+-- @babel/plugin-transform-runtime te permite trabajar con todo el tema de asincronismo como ser async y await
+
+-- Debes crear el archivo de configuración de babel el cual tiene como nombre .babelrc con la configuaracion de los plugins y el loader para webpack
+-- Y se agrega la babel como un modulo de webpack en el archivo de configuracion de webpack
+
+## HTML
+
+** Con webpack tambien podemos empaquetar codigo HTML utilizando el HTML loader
+-- Podemos instalar la dependencia con el siguiente comando:
+-- npm install html-webpack-plugin -D 
+
+## CSS Y PREPROCESADORES
+
+** Para instar el plugin y el loader para css ejecutamos el siguiente comando:
+-- npm install mini-css-extract-plugin css-loader -D 
+
+** Para instar el plugin y el loader para archivos Sass ejecutamos el siguiente comando:
+-- npm install node-sass sass-loader -D 
+-- Adicional agregamos a los plugins la configuracion para los modulos, las siguiente regla
+
+{
+test: /\.s?css$/,
+use: [MiniCssExtractPlugin.loader,
+    "css-loader",
+    "sass-loader"]
+},
+
+** Para instar el plugin y el loader para archivos Stylus ejecutamos el siguiente comando:
+-- npm install stylus stylus-loader -D 
+
+## COPIAR ARCHIVOS AL DIRECTORIO DIST 
+
+** Para poder copiar archivo como imagenes que puedas necesitar en la version definitiva del proyecto, utilizamos el plugin copy webpack plugin y se instala con el siguiente comando:
+-- npm install copy-webpack-plugin -D 
+-- si al compilar el webpack da un error de compilacion por este plugin, una solucion es bajar la version del mismo a la 9.1.0 en el archivo package.json 
+
+## LOADER DE IMAGENES 
+** Realizando esta configuracion permite importar las imagenes como variables y convirtiendolas a base 64 para una mayor optimizacion
+-- No es necesario instalar ninguna dependencia
+-- para definir el directorio donde se guardaran las imagenes, se agregar la siguiente linea en el output: assetModuleFilename: 'assets/images/[hash][ext][query]'
+
+## LOADER DE FUENTES
+** Para realizar en empaquetado de fuentes en el proyecto, necesitamos instalar 2 dependencias con el siguiente comando:
+-- npm install url-loader file-loader -D 
+-- se agrega la siguiente regla:
+ {
+    test: /\.(woff|woff2)$/,
+    use: {
+        loader: 'url-loader',
+        options: {
+            limit: 10000,
+            mimetype: "application/font-woff",
+            name: "[name].[ext]",
+            outputPath: "./assets/fonts/",
+            publicPath: "../assets/fonts/",
+            esModule: false
+        }
+    }
+}
+-- Existe una opcion para empaquetar fuentes sin necesidad de dependencias y es agregando la siguiente regla: 
+{
+    test: /\.(woff|woff2)$/,
+    type: "asset/resource",
+    generator: {
+        filename: "assets/fonts/[name][ext]"
+    }
+}
+
+## OPTIMIZACION Y MINIFICACION
+** Para esto vamos a instalar 2 dependencia con el siguiente comando:
+-- npm install css-minimizer-webpack-plugin terser-webpack-plugin -D 
+
+## VARIABLES DE ENTORNO 
+** Para la configuracion de las variables de entorno podemos instalar una dependencia que nos ayudara con esto
+-- para la instalacion se ejecuta el siguiente comando:
+-- npm install dotenv-webpack -D 
+
+## OPTIMIZACION PARA DESARROLLO 
+-- Creamos una copia del archivo webpack.config.js pero con el nombre webpack.config.dev.js 
+-- agregamos en las propiedades del modulo de configuracion el mode: 'development'
+-- Se eliminan los modulos y plugins de optimizacion para produccion 
+-- Para el modo watch podemos agregar la propiedad watch: true al archivo de configuracion de desarrollo o agregar una script 
+    en el archivo package.json para el modo watch donde se ejecuta el script dev con la bandera --watch:
+-- "dev": "webpack --config webpack.config.dev.js",
+-- "watch": "npm run dev --watch"
+
+## OPTIMIZACION PARA PRODUCCION
+-- Para la limpieza de archivos innecesarios y que eston no se agreguen a produccion se agrega una dependencia
+-- Instalamos la dependencia con el siguiente comando 
+-- npm install clean-webpack-plugin -D 
+
+
+
+
